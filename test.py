@@ -24,3 +24,5 @@ for item in last_column:
     df['extracted links'] = current_url
     df.to_excel(filename, index=False)
     driver.quit()
+
+print("ciao")

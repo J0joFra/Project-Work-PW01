@@ -1,29 +1,45 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import requests
+from bs4 import BeautifulSoup
 import pandas as pd
 
-filename = r"C:\Users\JoaquimFrancalanci\OneDrive - ITS Angelo Rizzoli\Desktop\Progetti\Project Work\CIR_Ingredients_Report.xlsx"
-df = pd.read_excel(filename)
-last_column = df.iloc[:, -1]
+def fetch_published_report_link(ingredient_url):
+    response = requests.get(ingredient_url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        sub_info_content = soup.find(id='ContentContainer_ContentBottom_subInfoContent')
+        if sub_info_content:
+            link_tag = sub_info_content.find('a', string='Published Report', href=True)
+            if link_tag:
+                return f"https://cir-reports.cir-safety.org/{link_tag['href']}"
+    return ""
 
-for item in last_column:
-    website_url = item
-    link_text = "Published Report"
-    webdriver_path = "chromedriver.exe"
-    driver = webdriver.Chrome(executable_path=r"C:\Chrome\chromedriver.exe")
-    driver.get(website_url)
-    link = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.LINK_TEXT, link_text))
-    )
-    link.click()
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-    current_url = driver.current_url
+def main():
+    # Carica il file Excel esistente
+    filename = r"C:\Users\JoaquimFrancalanci\OneDrive - ITS Angelo Rizzoli\Desktop\Progetti\Project Work\CIR_Ingredients_Report.xlsx"
+    df = pd.read_excel(filename)
+
+    # Assicurati che ci sia una colonna 'link' nel DataFrame
+    if 'link' not in df.columns:
+        print("La colonna 'link' non esiste nel file Excel.")
+        return
+
+    # Estrarre i link dalla colonna 'link' e ottenere i link di "Published Report"
+    attachment_links = []
+    for link in df['link']:
+        attachment_link = fetch_published_report_link(link)
+        attachment_links.append(attachment_link)
+
+    # Aggiungere la nuova colonna 'published_report_link' nel DataFrame
+    df['published_report_link'] = attachment_links
+
+    # Scrivere i dati aggiornati nel file Excel
+    df.to_excel(filename, index=False, sheet_name='CIR Ingredients Report')
     
-    df['extracted links'] = current_url
-    df.to_excel(filename, index=False)
-    driver.quit()
+    print("File Excel aggiornato con successo!")
+
+# Esegui la funzione principale
+if __name__ == "__main__":
+    main()
 
 
 

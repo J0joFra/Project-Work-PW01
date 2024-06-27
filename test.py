@@ -3,6 +3,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import pandas as pd
+
+# Path to your Excel file
+file_path = "path/to/your/excel_file.xlsx"
+
+# Read the Excel file into a DataFrame
+df = pd.read_excel(file_path)
+
+# Get the last column (assuming no headers or named columns)
+last_column = df.iloc[:, -1]
+
+# Loop through each item in the last column
+for item in last_column:
+  # Do something with the item (e.g., print it)
+  print(item)
+
 for i in u:
     # Replace with the URL of the website you want to open
     website_url = i

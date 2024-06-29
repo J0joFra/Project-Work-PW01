@@ -1,48 +1,47 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from tqdm import tqdm
+import re
 
-def fetch_published_report_link(ingredient_url):
-    response = requests.get(ingredient_url)
+def fetch_noael_value(report_url):
+    response = requests.get(report_url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
-        sub_info_content = soup.find(id='ContentContainer_ContentBottom_subInfoContent')
-        if sub_info_content:
-            link_tag = sub_info_content.find('a', string='Published Report', href=True)
-            if link_tag:
-                return f"https://cir-reports.cir-safety.org/{link_tag['href']}"
-            print("copiato")
-    return ""
+        # Supponiamo che il valore di Noael sia tra i contenuti del report
+        report_content = soup.find(id='ContentContainer_ContentBottom_reportContent')
+        if report_content:
+            # Cerca tutte le occorrenze di Noael per topi e ratti
+            noael_pattern = re.compile(r'Noael.*?topi.*?ratti.*?(\d+(\.\d+)?)', flags=re.IGNORECASE)
+            matches = re.findall(noael_pattern, report_content.get_text())
+            if matches:
+                # Trova il valore di Noael più basso
+                min_value = min(float(match[0]) for match in matches)
+                return min_value
+    return None
 
 def main():
-    # Carica il file Excel esistente
     filename = r"C:\Users\JoaquimFrancalanci\OneDrive - ITS Angelo Rizzoli\Desktop\Progetti\Project Work\CIR_Ingredients_Report.xlsx"
     df = pd.read_excel(filename)
 
-    # Assicurati che ci sia una colonna 'link' nel DataFrame
-    if 'link' not in df.columns:
-        print("La colonna 'link' non esiste nel file Excel.")
+    if 'published_report_link' not in df.columns:
+        print("La colonna 'published_report_link' non esiste nel file Excel.")
         return
 
-    # Estrarre i link dalla colonna 'link' e ottenere i link di "Published Report"
-    attachment_links = []
-    for index, link in enumerate(df['link']):
-        if index >= 2:  # Limita a soli due link
-            break
-        attachment_link = fetch_published_report_link(link)
-        attachment_links.append(attachment_link)
+    with tqdm(total=len(df)) as pbar:
+        noael_values = []
 
-    # Aggiungi link vuoti per le righe rimanenti (se presenti)
-    attachment_links.extend([''] * (len(df) - len(attachment_links)))
+        for link in df['published_report_link']:
+            # Ora che hai il link al report, cerca il valore di Noael
+            noael_value = fetch_noael_value(link)
+            pbar.update(1)
+            noael_values.append(noael_value)
 
-    # Aggiungere la nuova colonna 'published_report_link' nel DataFrame
-    df['published_report_link'] = attachment_links
+    df['noael_value'] = noael_values
 
-    # Scrivere i dati aggiornati nel file Excel
     df.to_excel(filename, index=False, sheet_name='CIR Ingredients Report')
     
     print("File Excel aggiornato con successo!")
 
-# Esegui la funzione principale
 if __name__ == "__main__":
     main()

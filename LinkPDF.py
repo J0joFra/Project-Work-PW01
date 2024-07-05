@@ -17,16 +17,28 @@ def fetch_report_details(ingredient_url, pbar):
                 cells = row.find_all('td')
                 status_cell = cells[1]
                 link_tag = status_cell.find('a')
-                status = status_cell.text.strip()
                 date_reference = cells[2].text.strip()
                 
-                if link_tag in status:
+                if link_tag and 'report' in link_tag.text.lower():
                     report_link = f"https://cir-reports.cir-safety.org/{link_tag['href']}"
+                    status = link_tag.text.strip()
                     reports.append((date_reference, report_link, status))
             
             if reports:
+                # Prova a convertire la data, se fallisce lascia la stringa originale
+                for report in reports:
+                    try:
+                        report_date = pd.to_datetime(report[0], format='%B %d, %Y')
+                    except ValueError:
+                        try:
+                            report_date = pd.to_datetime(report[0], format='%Y')
+                        except ValueError:
+                            report_date = report[0]  # Mantieni il formato originale se non riconosciuto
+
+                    report = (report_date, report[1], report[2])
+                
                 # Ordina i report per data in ordine decrescente e restituisci il più recente
-                reports.sort(key=lambda x: pd.to_datetime(x[0], format='%B %d, %Y'), reverse=True)
+                reports.sort(key=lambda x: x[0], reverse=True)
                 pbar.update(1)
                 return reports[0][1], reports[0][2], reports[0][0]
     

@@ -64,22 +64,22 @@ def main():
         return
 
     # Create a tqdm progress bar
-    with tqdm(total=min(70, len(df) - 30)) as pbar:  # Limit progress bar to 70 items or less
+    with tqdm(total=min(800, len(df) - 200)) as pbar:  # Limit progress bar to 800 items or less
         report_links = []
         statuses = []
         date_references = []
         
-        # Iterate from the 30th to the 100th link
-        for link in df['link'][30:100]:
+        # Iterate from the 200th to the 1000th link
+        for link in df['link'][200:1000]:
             report_link, status, date_reference = fetch_report_details(link, pbar)
             report_links.append(report_link)
             statuses.append(status)
             date_references.append(date_reference)
 
     # Add new columns to the DataFrame
-    df.loc[30:99, 'Link del report'] = report_links  # For rows 30 to 99
-    df.loc[30:99, 'Stato'] = statuses
-    df.loc[30:99, 'Data/Referenza'] = date_references
+    df.loc[200:999, 'Link del report'] = report_links  # For rows 200 to 999
+    df.loc[200:999, 'Stato'] = statuses
+    df.loc[200:999, 'Data/Referenza'] = date_references
 
     # Write the updated data back to the Excel file
     df.to_excel(filename, index=False, sheet_name='CIR Ingredients Report')

@@ -58,9 +58,32 @@ def extract_values(text):
 
     return species_ld50, species_noael
 
+def get_lowest_value(values):
+    if not values:
+        return ""
+    # Extract numeric values with mL/kg unit
+    numeric_values = []
+    for v in values:
+        if 'mL/kg' in v:
+            matches = re.findall(r'\d+(\.\d+)?', v)
+            if matches and matches[0]:  # Ensure matches[0] is not empty
+                try:
+                    numeric_values.append(float(matches[0]))
+                except ValueError:
+                    continue  # Skip values that can't be converted to float
+    if numeric_values:
+        return f"{min(numeric_values)} mL/kg"
+    return values[0]  # In case no mL/kg unit is found
+
 # Read the Excel file
 excel_file = r"C:\Users\JoaquimFrancalanci\OneDrive - ITS Angelo Rizzoli\Desktop\Progetti\Project Work\CIR_Ingredients_Report.xlsx"
 df = pd.read_excel(excel_file)
+
+# Ensure new columns exist in the DataFrame and set dtype to object
+for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mouse', 'NOAEL Rat']:
+    if col not in df.columns:
+        df[col] = ""
+    df[col] = df[col].astype(object)
 
 # Iterate over each row in the dataframe
 for index, row in df.iterrows():
@@ -71,14 +94,14 @@ for index, row in df.iterrows():
         if pdf_text:
             ld50_values, noael_values = extract_values(pdf_text)
             
-            # Update dataframe with extracted values
-            df.at[index, 'LD50 Rabbit'] = ', '.join(ld50_values['rabbit'])
-            df.at[index, 'LD50 Mouse'] = ', '.join(ld50_values['mouse'])
-            df.at[index, 'LD50 Rat'] = ', '.join(ld50_values['rat'])
+            # Get the lowest value for each species and update the DataFrame
+            df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_values['rabbit'])
+            df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_values['mouse'])
+            df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_values['rat'])
             
-            df.at[index, 'NOAEL Rabbit'] = ', '.join(noael_values['rabbit'])
-            df.at[index, 'NOAEL Mouse'] = ', '.join(noael_values['mouse'])
-            df.at[index, 'NOAEL Rat'] = ', '.join(noael_values['rat'])
+            df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_values['rabbit'])
+            df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_values['mouse'])
+            df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_values['rat'])
         else:
             print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
 

@@ -10,7 +10,7 @@ def fetch_report_details(ingredient_url, pbar):
         table = soup.find('table', {'id': 'ContentContainer_ContentBottom_ingredientReferences'})
         
         if table:
-            rows = table.find_all('tr')[1:]  # Ignora l'intestazione
+            rows = table.find_all('tr')[1:]  # Ignore header
             reports = []
             
             for row in rows:
@@ -40,11 +40,11 @@ def fetch_report_details(ingredient_url, pbar):
                             try:
                                 report_date = pd.to_datetime(report[0])
                             except ValueError:
-                                report_date = pd.NaT  # Imposta la data come NaT se non è riconosciuta
+                                report_date = pd.NaT  # Set as NaT if date not recognized
 
                     formatted_reports.append((report_date, report[1], report[2]))
                 
-                # Ordina i report per data, gestendo NaT come date più vecchie
+                # Sort reports by date, treating NaT as older dates
                 formatted_reports.sort(key=lambda x: (pd.Timestamp.min if pd.isna(x[0]) else x[0]), reverse=True)
                 pbar.update(1)
                 most_recent_report = formatted_reports[0]
@@ -54,38 +54,38 @@ def fetch_report_details(ingredient_url, pbar):
     return "null", "null", "null"
 
 def main():
-    # Carica il file Excel esistente
+    # Load the existing Excel file
     filename = r"C:\Users\JoaquimFrancalanci\OneDrive - ITS Angelo Rizzoli\Desktop\Progetti\Project Work\CIR_Ingredients_Report.xlsx"
     df = pd.read_excel(filename)
 
-    # Assicurati che ci sia una colonna 'link' nel DataFrame
+    # Ensure there's a 'link' column in the DataFrame
     if 'link' not in df.columns:
-        print("La colonna 'link' non esiste nel file Excel.")
+        print("The 'link' column does not exist in the Excel file.")
         return
 
-    # Crea una barra di avanzamento tqdm
-    with tqdm(total=min(30, len(df))) as pbar:  # Limita la barra di avanzamento a 30 elementi o meno
+    # Create a tqdm progress bar
+    with tqdm(total=min(70, len(df) - 30)) as pbar:  # Limit progress bar to 70 items or less
         report_links = []
         statuses = []
         date_references = []
         
-        # Itera solo sui primi 30 link
-        for link in df['link'][:30]:
+        # Iterate from the 30th to the 100th link
+        for link in df['link'][30:100]:
             report_link, status, date_reference = fetch_report_details(link, pbar)
             report_links.append(report_link)
             statuses.append(status)
             date_references.append(date_reference)
 
-    # Aggiungere le nuove colonne nel DataFrame
-    df.loc[:29, 'Link del report'] = report_links  # Solo per le prime 30 righe
-    df.loc[:29, 'Stato'] = statuses
-    df.loc[:29, 'Data/Referenza'] = date_references
+    # Add new columns to the DataFrame
+    df.loc[30:99, 'Link del report'] = report_links  # For rows 30 to 99
+    df.loc[30:99, 'Stato'] = statuses
+    df.loc[30:99, 'Data/Referenza'] = date_references
 
-    # Scrivere i dati aggiornati nel file Excel
+    # Write the updated data back to the Excel file
     df.to_excel(filename, index=False, sheet_name='CIR Ingredients Report')
     
-    print("File Excel aggiornato con successo!")
+    print("Excel file successfully updated!")
 
-# Esegui la funzione principale
+# Run the main function
 if __name__ == "__main__":
     main()

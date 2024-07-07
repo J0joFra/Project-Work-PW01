@@ -3,6 +3,7 @@ from PyPDF2 import PdfReader
 import io
 import re
 import pandas as pd
+from tqdm import tqdm
 
 def extract_text_from_pdf_url(pdf_url):
     try:
@@ -27,7 +28,7 @@ def extract_text_from_pdf_url(pdf_url):
 def extract_values(text):
     # Define regular expressions for NOAEL and LD50
     ld50_pattern = re.compile(r'LD50\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
-    noael_pattern = re.compile(r'NOAEL\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
+    noael_pattern = re.compile(r'NOAEL\s*>\\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
 
     # Find all matches in the text
     ld50_matches = ld50_pattern.findall(text)
@@ -85,8 +86,8 @@ for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mous
         df[col] = ""
     df[col] = df[col].astype(object)
 
-# Iterate over each row in the dataframe
-for index, row in df.iterrows():
+# Iterate over each row in the dataframe with a progress bar
+for index, row in tqdm(df.iterrows(), total=len(df)):
     pdf_url = row['Link del report']
     if pd.notna(pdf_url):  # Check if the URL is not NaN
         pdf_text = extract_text_from_pdf_url(pdf_url)

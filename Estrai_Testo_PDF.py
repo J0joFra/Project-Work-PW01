@@ -28,7 +28,7 @@ def extract_text_from_pdf_url(pdf_url):
 def extract_values(text):
     # Define regular expressions for NOAEL and LD50
     ld50_pattern = re.compile(r'LD50\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
-    noael_pattern = re.compile(r'NOAEL\s*>\\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
+    noael_pattern = re.compile(r'NOAEL\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
 
     # Find all matches in the text
     ld50_matches = ld50_pattern.findall(text)
@@ -105,7 +105,12 @@ for index, row in tqdm(df.iterrows(), total=len(df)):
             df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_values['rat'])
         else:
             print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
+    
+    # Save the dataframe to Excel every 100 rows
+    if index > 0 and index % 100 == 0:
+        df.to_excel(excel_file, index=False)
+        print(f"Excel file saved at row {index}.")
 
-# Save updated dataframe back to Excel
+# Save updated dataframe back to Excel at the end
 df.to_excel(excel_file, index=False)
 print("Extraction and update completed successfully.")

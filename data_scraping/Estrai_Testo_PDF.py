@@ -87,7 +87,7 @@ for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mous
     df[col] = df[col].astype(object)
 
 # Continue processing from row 800
-start_row = 0
+start_row = 50
 
 # Iterate over each row in the dataframe with a progress bar
 for index, row in tqdm(df.iterrows(), total=len(df)):

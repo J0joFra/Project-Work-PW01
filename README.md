@@ -22,9 +22,9 @@ Questo processo è suddiviso in tre fasi principali:
 
 ## Descrizione dei File di Codice
 
-- 1. Raccolta Dati JSON e Creazione del File Excel
-- 2. Estrazione dei Dettagli dai Link degli Ingredienti
-- 3. Estrazione di Valori dai PDF dei Report
+- 1 Raccolta Dati JSON e Creazione del File Excel
+- 2 Estrazione dei Dettagli dai Link degli Ingredienti
+- 3 Estrazione di Valori dai PDF dei Report
 
 ## Come è Stato Svolto
 

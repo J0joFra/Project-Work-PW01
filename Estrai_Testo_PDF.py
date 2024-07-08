@@ -41,19 +41,19 @@ def extract_values(text):
     # Check for matches and assign to appropriate species
     for match in ld50_matches:
         value = match[0].strip()
-        if re.search(r'\brabbit\b', text, re.IGNORECASE):
-            species_ld50['rabbit'].append(value)
-        elif re.search(r'\bmouse\b', text, re.IGNORECASE):
+        if re.search(r'\bmouse\b', text, re.IGNORECASE):
             species_ld50['mouse'].append(value)
+        elif re.search(r'\brabbit\b', text, re.IGNORECASE):
+            species_ld50['rabbit'].append(value)
         elif re.search(r'\brat\b', text, re.IGNORECASE):
             species_ld50['rat'].append(value)
 
     for match in noael_matches:
         value = match[0].strip()
-        if re.search(r'\brabbit\b', text, re.IGNORECASE):
-            species_noael['rabbit'].append(value)
-        elif re.search(r'\bmouse\b', text, re.IGNORECASE):
+        if re.search(r'\bmouse\b', text, re.IGNORECASE):
             species_noael['mouse'].append(value)
+        elif re.search(r'\brabbit\b', text, re.IGNORECASE):
+            species_noael['rabbit'].append(value)
         elif re.search(r'\brat\b', text, re.IGNORECASE):
             species_noael['rat'].append(value)
 
@@ -86,8 +86,14 @@ for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mous
         df[col] = ""
     df[col] = df[col].astype(object)
 
+# Continue processing from row 800
+start_row = 0
+
 # Iterate over each row in the dataframe with a progress bar
 for index, row in tqdm(df.iterrows(), total=len(df)):
+    if index < start_row:
+        continue
+    
     pdf_url = row['Link del report']
     if pd.notna(pdf_url):  # Check if the URL is not NaN
         pdf_text = extract_text_from_pdf_url(pdf_url)
@@ -96,12 +102,12 @@ for index, row in tqdm(df.iterrows(), total=len(df)):
             ld50_values, noael_values = extract_values(pdf_text)
             
             # Get the lowest value for each species and update the DataFrame
-            df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_values['rabbit'])
             df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_values['mouse'])
+            df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_values['rabbit'])
             df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_values['rat'])
             
+            df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_values['mouse'])                        
             df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_values['rabbit'])
-            df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_values['mouse'])
             df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_values['rat'])
         else:
             print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")

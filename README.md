@@ -8,7 +8,7 @@ Questo processo è suddiviso in tre fasi principali:
 2. **Estrazione dei dettagli dei report dai link degli ingredienti** e aggiornamento del file Excel.
 3. **Estrazione dei valori specifici dai PDF dei report** e aggiornamento finale del file Excel.
 
-<summary><details>## Strumenti Utilizzati</details>
+## Strumenti Utilizzati
 
 - **Linguaggio di Programmazione:** Python
 - **Librerie:** 

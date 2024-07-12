@@ -8,7 +8,7 @@ Questo processo è suddiviso in tre fasi principali:
 2. **Estrazione dei dettagli dei report dai link degli ingredienti** e aggiornamento del file Excel.
 3. **Estrazione dei valori specifici dai PDF dei report** e aggiornamento finale del file Excel.
 
-## Strumenti Utilizzati
+<summary><details>## Strumenti Utilizzati</details>
 
 - **Linguaggio di Programmazione:** Python
 - **Librerie:** 
@@ -18,7 +18,7 @@ Questo processo è suddiviso in tre fasi principali:
   - `pandas` per la manipolazione dei dati.
   - `tqdm` per la visualizzazione della progressione delle operazioni.
   - `PyPDF2` per l'estrazione di testo dai file PDF.
-  - `io` e `re` per la gestione degli stream e l'uso di espressioni regolari.
+  - `io` e `re` per la gestione degli stream e l'uso di espressioni regolari.</summary>
 
 ## Descrizione dei File di Codice
 

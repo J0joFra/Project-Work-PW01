@@ -42,4 +42,3 @@ Questo progetto è stato sviluppato per automatizzare il processo di raccolta, a
    - Per ogni link di PDF presente, viene estratto il testo del PDF e cercati i valori di LD50 e NOAEL utilizzando espressioni regolari.
    - I valori estratti vengono aggiunti al file CSV.
 
-L'intero processo è automatizzato per garantire efficienza e accuratezza nella raccolta e gestione dei dati relativi agli ingredienti dei rapporti CIR.

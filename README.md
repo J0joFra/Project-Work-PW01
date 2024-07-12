@@ -42,3 +42,6 @@ Questo progetto è stato sviluppato per automatizzare il processo di raccolta, a
    - Per ogni link di PDF presente, viene estratto il testo del PDF e cercati i valori di LD50 e NOAEL utilizzando espressioni regolari.
    - I valori estratti vengono aggiunti al file CSV.
 
+
+Il codice sorgente utilizzato per questo progetto è disponibile su GitHub:
+- [Codice su GitHub](https://github.com/J0joFra/Toxicity_Dataset_Make)

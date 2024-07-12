@@ -23,7 +23,7 @@ def save_to_csv(data, filename):
     headers = ['pcpc_ingredientid', 'pcpc_ingredientname', 'link']
     with open(filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(headers)
+        writer.writerow(headers) # Scrivo l'intestazione e ogni riga di dati.
         writer.writerows(data)
     print(f"File CSV creato con successo: {filename}")
 

@@ -7,12 +7,15 @@ from tqdm import tqdm
 
 def extract_text_from_pdf_url(pdf_url):
     try:
+        # Richiesta GET all'URL del PDF
         response = requests.get(pdf_url)
         response.raise_for_status()
         
+        # Leggo il contenuto del PDF
         file_stream = io.BytesIO(response.content)
         pdf_reader = PdfReader(file_stream)
         
+        # Estraggo il testo da tutte le pagine del PDF
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
@@ -26,17 +29,22 @@ def extract_text_from_pdf_url(pdf_url):
         return None
 
 def extract_values(text):
+    # Definisco i pattern regex per LD50 e NOAEL
     ld50_pattern = re.compile(r'LD50\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
     noael_pattern = re.compile(r'NOAEL\s*>\s*(\d+(\.\d+)?\s*\w+/kg)', re.IGNORECASE)
 
+    # Trovo tutte le occorrenze dei pattern nel testo
     ld50_matches = ld50_pattern.findall(text)
     noael_matches = noael_pattern.findall(text)
 
+    # Dizionari per conservare i valori per specie
     species_ld50 = {'rabbit': [], 'mouse': [], 'rat': []}
     species_noael = {'rabbit': [], 'mouse': [], 'rat': []}
 
+    # Associo i valori trovati alle specie
     for match in ld50_matches:
         value = match[0].strip()
+        # In base all'animale cercato e il valore ottenuto
         if re.search(r'\brabbit\b', text, re.IGNORECASE):
             species_ld50['rabbit'].append(value)        
         elif re.search(r'\bmouse\b', text, re.IGNORECASE):
@@ -75,10 +83,12 @@ def main():
     csv_file = 'CIR_Ingredients_Report_Final.csv'
     df = pd.read_csv(csv_file)
 
+    # Aggiungo le colonne necessarie se non esistono
     for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mouse', 'NOAEL Rat']:
         if col not in df.columns:
             df[col] = ""
 
+    # Riga di partenza -> da modificare ogni volta
     start_row = 5900
 
     for index, row in tqdm(df.iterrows(), total=len(df)):
@@ -102,10 +112,13 @@ def main():
             else:
                 print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
 
+        # Salvo il file CSV ogni 100 righe,
+        # In caso di standby o problemi ho dei valori salvati
         if index > 0 and index % 100 == 0:
             df.to_csv(csv_file, index=False)
             print(f"CSV file saved at row {index}.")
 
+    # Salvo il file CSV finale
     df.to_csv(csv_file, index=False)
     print("Extraction and update completed successfully.")
 

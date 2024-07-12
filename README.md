@@ -43,4 +43,4 @@ Questo progetto è stato sviluppato per automatizzare il processo di raccolta, a
    - I valori estratti vengono aggiunti al file CSV.
 
 
-Il codice sorgente utilizzato per questo progetto è disponibile su GitHub: - [Codice su GitHub]([https://github.com/J0joFra/Toxicity_Dataset_Maker])
+Il codice sorgente utilizzato per questo progetto è disponibile su GitHub:  [Codice su GitHub](https://github.com/J0joFra/Toxicity_Dataset_Maker)

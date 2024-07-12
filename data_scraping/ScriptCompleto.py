@@ -1,15 +1,16 @@
 import requests
 import csv
 
+#Rrichiesta POST all'URL fornito
 def fetch_data(url):
     response = requests.post(url)
     if response.status_code == 200:
-        data = response.json()
+        data = response.json() # Recupero i dati in formato JSON
         return [
             (
-                item.get('pcpc_ingredientid', ''),
-                item.get('pcpc_ingredientname', ''),
-                f"https://cir-reports.cir-safety.org/cir-ingredient-status-report/?id={item.get('pcpc_ingredientid', '')}"
+                item.get('pcpc_ingredientid', ''), # Estraggo pcpc_ingredientid
+                item.get('pcpc_ingredientname', ''), # Estraggo pcpc_ingredientname 
+                f"https://cir-reports.cir-safety.org/cir-ingredient-status-report/?id={item.get('pcpc_ingredientid', '')}" # Costruisco un link utilizzando pcpc_ingredientid
             )
             for item in data.get('results', [])
         ]
@@ -17,6 +18,7 @@ def fetch_data(url):
         print(f"Errore nella richiesta: {response.status_code} - {response.reason}")
         return []
 
+# Salvo i dati in un file CSV con il nome specificato
 def save_to_csv(data, filename):
     headers = ['pcpc_ingredientid', 'pcpc_ingredientname', 'link']
     with open(filename, 'w', newline='') as file:

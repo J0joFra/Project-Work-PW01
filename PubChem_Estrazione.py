@@ -67,8 +67,18 @@ def get_pubchem_data(ingredient_name):
     url = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON/?source=Hazardous%20Substances%20Data%20Bank%20(HSDB)&heading_type=Compound&heading=Non-Human%20Toxicity%20Values%20(Complete)&page=1'
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'}
     response = requests.get(url, headers=header)
-    response = response.json()
-    ingredients_list = response["Annotations"]["Annotation"]
+
+    if response.status_code != 200:
+        print(f"Failed to retrieve PubChem data for {ingredient_name}: Status code {response.status_code}")
+        return [], []
+
+    try:
+        response_json = response.json()
+    except ValueError:
+        print(f"Failed to decode JSON response for {ingredient_name}")
+        return [], []
+
+    ingredients_list = response_json.get("Annotations", {}).get("Annotation", [])
     for ingredient in ingredients_list:
         if ingredient["Name"].lower() == ingredient_name.lower():
             data = ingredient["Data"]
@@ -88,7 +98,7 @@ def main():
         if col not in df.columns:
             df[col] = ""
     
-    start_row = 0
+    start_row = 411
     for index, row in tqdm(df.iterrows(), total=len(df)):
         if index < start_row:
             continue

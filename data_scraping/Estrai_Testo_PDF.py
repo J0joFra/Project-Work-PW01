@@ -80,8 +80,8 @@ def get_lowest_value(values):
     return values[0]
 
 def main():
-    csv_file = 'CIR_Ingredients_Report_Final.csv'
-    df = pd.read_csv(csv_file)
+    excel_file = 'CIR_Ingredients_Report_Final.xlsx'
+    df = pd.read_excel(excel_file)
 
     # Aggiungo le colonne necessarie se non esistono
     for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mouse', 'NOAEL Rat']:
@@ -112,14 +112,14 @@ def main():
             else:
                 print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
 
-        # Salvo il file CSV ogni 100 righe,
+        # Salvo il file excel ogni 100 righe,
         # In caso di standby o problemi ho dei valori salvati
         if index > 0 and index % 100 == 0:
-            df.to_csv(csv_file, index=False)
-            print(f"CSV file saved at row {index}.")
+            df.to_excel(excel_file, index=False)
+            print(f"excel file saved at row {index}.")
 
-    # Salvo il file CSV finale
-    df.to_csv(csv_file, index=False)
+    # Salvo il file excel finale
+    df.to_excel(excel_file, index=False)
     print("Extraction and update completed successfully.")
 
 if __name__ == "__main__":

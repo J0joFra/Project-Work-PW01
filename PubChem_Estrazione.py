@@ -87,42 +87,49 @@ def main():
     for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mouse', 'NOAEL Rat']:
         if col not in df.columns:
             df[col] = ""
+    
     start_row = 0
     for index, row in tqdm(df.iterrows(), total=len(df)):
         if index < start_row:
             continue
-        pdf_url = row['Link del report']
-        if pd.notna(pdf_url):
-            pdf_text = extract_text_from_pdf_url(pdf_url)
-            if pdf_text:
-                ld50_values, noael_values = extract_values(pdf_text)
-                df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_values['rat'])
-                df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_values['rabbit'])
-                df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_values['mouse'])
-                df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_values['rat'])                       
-                df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_values['rabbit'])            
-                df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_values['mouse'])
+        
+        if all(pd.isna(row[col]) for col in ['LD50 Rabbit', 'LD50 Mouse', 'LD50 Rat', 'NOAEL Rabbit', 'NOAEL Mouse', 'NOAEL Rat']):
+            pdf_url = row['Link del report']
+            if pd.notna(pdf_url):
+                pdf_text = extract_text_from_pdf_url(pdf_url)
+                if pdf_text:
+                    ld50_values, noael_values = extract_values(pdf_text)
+                    df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_values['rat'])
+                    df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_values['rabbit'])
+                    df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_values['mouse'])
+                    df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_values['rat'])                       
+                    df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_values['rabbit'])            
+                    df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_values['mouse'])
+                else:
+                    print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
             else:
-                print(f"Failed to retrieve or parse PDF from URL: {pdf_url}")
+                ingredient_name = row['pcpc_ingredientname']
+                pubchem_values, pubchem_sources = get_pubchem_data(ingredient_name)
+                if pubchem_values:
+                    ld50_rabbit = [val for val in pubchem_values if 'rabbit' in val.lower() and 'ld50' in val.lower()]
+                    ld50_mouse = [val for val in pubchem_values if 'mouse' in val.lower() and 'ld50' in val.lower()]
+                    ld50_rat = [val for val in pubchem_values if 'rat' in val.lower() and 'ld50' in val.lower()]
+                    noael_rabbit = [val for val in pubchem_values if 'rabbit' in val.lower() and 'noael' in val.lower()]
+                    noael_mouse = [val for val in pubchem_values if 'mouse' in val.lower() and 'noael' in val.lower()]
+                    noael_rat = [val for val in pubchem_values if 'rat' in val.lower() and 'noael' in val.lower()]
+                    df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_rat)
+                    df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_rabbit)
+                    df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_mouse)
+                    df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_rat)
+                    df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_rabbit)
+                    df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_mouse)
         else:
-            ingredient_name = row['pcpc_ingredientname']
-            pubchem_values, pubchem_sources = get_pubchem_data(ingredient_name)
-            if pubchem_values:
-                ld50_rabbit = [val for val in pubchem_values if 'rabbit' in val.lower() and 'ld50' in val.lower()]
-                ld50_mouse = [val for val in pubchem_values if 'mouse' in val.lower() and 'ld50' in val.lower()]
-                ld50_rat = [val for val in pubchem_values if 'rat' in val.lower() and 'ld50' in val.lower()]
-                noael_rabbit = [val for val in pubchem_values if 'rabbit' in val.lower() and 'noael' in val.lower()]
-                noael_mouse = [val for val in pubchem_values if 'mouse' in val.lower() and 'noael' in val.lower()]
-                noael_rat = [val for val in pubchem_values if 'rat' in val.lower() and 'noael' in val.lower()]
-                df.at[index, 'LD50 Rat'] = get_lowest_value(ld50_rat)
-                df.at[index, 'LD50 Rabbit'] = get_lowest_value(ld50_rabbit)
-                df.at[index, 'LD50 Mouse'] = get_lowest_value(ld50_mouse)
-                df.at[index, 'NOAEL Rat'] = get_lowest_value(noael_rat)
-                df.at[index, 'NOAEL Rabbit'] = get_lowest_value(noael_rabbit)
-                df.at[index, 'NOAEL Mouse'] = get_lowest_value(noael_mouse)
+            print(f"Skipping ingredient at row {index} as it already has values.")
+        
         if index > 0 and index % 100 == 0:
             df.to_excel(excel_file, index=False)
             print(f"Excel file saved at row {index}.")
+    
     df.to_excel(excel_file, index=False)
     print("Extraction and update completed successfully.")
 
